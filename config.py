@@ -1,0 +1,8 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent / '.env')
+
+TEMPLATE_PATH = str(Path(__file__).parent / 'template.docx')
+OUTPUT_DIR = str(Path(__file__).parent / 'output')
