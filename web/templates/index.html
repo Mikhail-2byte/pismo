@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Генератор деловых писем</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 950:'#071525', 900:'#0f2540', 800:'#1a3a5c', 700:'#1e4977', 600:'#2563a0' },
+            gold: { 600:'#a07820', 500:'#c9a84c', 400:'#d4b866', 100:'#fdf8ec' }
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    @keyframes fadeSlide { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+    .step-anim { animation: fadeSlide .22s ease-out; }
+    .cursor::after { content:'▌'; animation: blink .8s infinite; color:#1a3a5c; font-size:.85em; }
+    .letter-font { font-family: 'Times New Roman', Georgia, serif; }
+    ::-webkit-scrollbar { width:5px }
+    ::-webkit-scrollbar-thumb { background:#c8d6e5; border-radius:3px }
+    input[type=date]::-webkit-calendar-picker-indicator { cursor:pointer; opacity:.6 }
+    .sidebar-step { transition: background .15s, color .15s; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans" x-data="letterApp()" x-cloak>
+
+<div class="flex min-h-screen">
+
+  <!-- ══════ SIDEBAR ══════ -->
+  <aside class="w-64 bg-navy-900 text-white flex flex-col shrink-0 sticky top-0 h-screen">
+
+    <!-- Logo -->
+    <div class="px-5 py-5 border-b border-navy-800 flex items-center gap-3">
+      <div class="w-9 h-9 bg-gold-500 rounded-lg flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5 text-navy-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      </div>
+      <div class="leading-tight">
+        <p class="text-sm font-bold text-white">Генератор</p>
+        <p class="text-xs text-blue-300">деловых писем</p>
+      </div>
+    </div>
+
+    <!-- Steps nav -->
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <template x-for="(label, i) in steps" :key="i">
+        <div class="sidebar-step flex items-center gap-2.5 px-3 py-2.5 rounded-lg"
+             :class="{
+               'bg-gold-500/20 text-gold-400': step === i+1,
+               'text-slate-500': step < i+1,
+               'text-blue-200': step > i+1
+             }">
+          <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+               :class="{
+                 'bg-gold-500 text-navy-900': step === i+1,
+                 'bg-green-500 text-white': step > i+1,
+                 'bg-navy-700 text-slate-500': step < i+1
+               }">
+            <span x-show="step <= i+1" x-text="i+1"></span>
+            <svg x-show="step > i+1" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <span class="text-xs font-medium truncate" x-text="label"></span>
+        </div>
+      </template>
+    </nav>
+
+    <!-- Footer -->
+    <div class="px-5 py-3 border-t border-navy-800">
+      <p class="text-[10px] text-blue-400 flex items-center gap-1">
+        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Groq AI
+      </p>
+    </div>
+  </aside>
+
+  <!-- ══════ MAIN ══════ -->
+  <main class="flex-1 flex flex-col min-h-screen overflow-hidden">
+
+    <!-- Top bar -->
+    <div class="bg-white border-b border-slate-200 px-8 py-3.5 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+      <div>
+        <h1 class="text-base font-bold text-navy-800" x-text="steps[step-1]"></h1>
+        <p class="text-xs text-slate-400 mt-0.5">Шаг <span x-text="step"></span> из <span x-text="steps.length"></span></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="h-1.5 w-44 bg-slate-200 rounded-full overflow-hidden">
+          <div class="h-full bg-gold-500 rounded-full transition-all duration-500"
+               :style="`width:${Math.round((step/steps.length)*100)}%`"></div>
+        </div>
+        <span class="text-xs font-semibold text-slate-500 w-8 text-right"
+              x-text="Math.round((step/steps.length)*100)+'%'"></span>
+      </div>
+    </div>
+
+    <!-- Step content -->
+    <div class="flex-1 overflow-y-auto p-8">
+      <div class="max-w-3xl mx-auto">
+
+        <!-- ── STEP 1: Upload ── -->
+        <div x-show="step === 1" class="step-anim">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <p class="text-slate-500 text-sm mb-6">Загрузите отчёт Excel со спецификациями и позициями.</p>
+
+            <div class="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200"
+                 :class="dragOver ? 'border-gold-400 bg-gold-100' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'"
+                 @dragover.prevent="dragOver=true"
+                 @dragleave.prevent="dragOver=false"
+                 @drop.prevent="handleDrop($event)"
+                 @click="$refs.fileInput.click()">
+              <input type="file" accept=".xlsx" class="hidden" x-ref="fileInput" @change="handleFileSelect($event)">
+
+              <div x-show="!fileName">
+                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                  </svg>
+                </div>
+                <p class="font-medium text-slate-700 mb-1">Перетащите файл сюда</p>
+                <p class="text-sm text-slate-400">или нажмите для выбора (.xlsx)</p>
+              </div>
+
+              <div x-show="fileName" class="flex items-center justify-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <svg class="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <p class="font-medium text-slate-800 text-sm" x-text="fileName"></p>
+                  <p class="text-xs text-green-600 mt-0.5">Файл выбран</p>
+                </div>
+                <button @click.stop="fileName=null; selectedFile=null; $refs.fileInput.value=''" class="ml-2 text-slate-300 hover:text-red-400 transition-colors">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div x-show="uploadError" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm" x-text="uploadError"></div>
+
+            <div class="mt-6 flex justify-end">
+              <button @click="uploadFile()" :disabled="!fileName || uploading"
+                class="px-6 py-2.5 bg-navy-800 hover:bg-navy-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2">
+                <svg x-show="uploading" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                <span x-text="uploading ? 'Загружаю...' : 'Загрузить и продолжить'"></span>
+                <svg x-show="!uploading" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 2: Manager ── -->
+        <div x-show="step === 2" class="step-anim">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <p class="text-slate-500 text-sm mb-6">Выберите ответственного менеджера по данному письму.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <template x-for="(m, i) in managers" :key="i">
+                <div @click="selectedManager = m"
+                     class="flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                     :class="selectedManager === m ? 'border-gold-500 bg-gold-100' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'">
+                  <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+                       :class="selectedManager === m ? 'bg-gold-500 text-navy-900' : 'bg-slate-100 text-slate-400'">
+                    <span x-text="m.charAt(0)"></span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-sm text-slate-800 truncate" x-text="m"></p>
+                    <p class="text-xs text-slate-400">Менеджер</p>
+                  </div>
+                  <svg x-show="selectedManager === m" class="w-4 h-4 text-gold-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </template>
+            </div>
+
+            <div class="mt-6 flex justify-between">
+              <button @click="step=1" class="px-5 py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">← Назад</button>
+              <button @click="loadContracts()" :disabled="!selectedManager || loadingContracts"
+                class="px-6 py-2.5 bg-navy-800 hover:bg-navy-700 disabled:opacity-40 text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2">
+                <svg x-show="loadingContracts" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                <span x-text="loadingContracts ? 'Загружаю...' : 'Продолжить'"></span>
+                <svg x-show="!loadingContracts" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 3: Contract ── -->
+        <div x-show="step === 3" class="step-anim">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <p class="text-slate-500 text-sm mb-6">Выберите договор для письма о переносе срока.</p>
+
+            <div class="space-y-2.5">
+              <template x-for="(c, i) in contracts" :key="i">
+                <div @click="selectedContractIdx = i"
+                     class="flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all"
+                     :class="selectedContractIdx === i ? 'border-gold-500 bg-gold-100' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'">
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center mt-0.5 shrink-0"
+                       :class="selectedContractIdx === i ? 'bg-gold-500' : 'bg-slate-100'">
+                    <svg class="w-4 h-4" :class="selectedContractIdx===i ? 'text-navy-900' : 'text-slate-400'"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm text-slate-800" x-text="c.company"></p>
+                    <p class="text-xs text-slate-500 mt-0.5 truncate" x-text="c.contract"></p>
+                    <span class="inline-block mt-1.5 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium" x-text="c.spec_count + ' спец.'"></span>
+                  </div>
+                  <svg x-show="selectedContractIdx === i" class="w-4 h-4 text-gold-500 shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </template>
+            </div>
+
+            <div class="mt-6 flex justify-between">
+              <button @click="step=2" class="px-5 py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">← Назад</button>
+              <button @click="loadSpecs()" :disabled="selectedContractIdx===null || loadingSpecs"
+                class="px-6 py-2.5 bg-navy-800 hover:bg-navy-700 disabled:opacity-40 text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2">
+                <svg x-show="loadingSpecs" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                <span x-text="loadingSpecs ? 'Загружаю...' : 'Продолжить'"></span>
+                <svg x-show="!loadingSpecs" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 4: Specs & Items ── -->
+        <div x-show="step === 4" class="step-anim">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <div class="flex items-center justify-between mb-5">
+              <p class="text-slate-500 text-sm">Выберите спецификации и позиции для письма.</p>
+              <button @click="selectAllItems()" class="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors">Выбрать все</button>
+            </div>
+
+            <div class="space-y-2.5">
+              <template x-for="(spec, si) in specs" :key="si">
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                  <!-- Spec header -->
+                  <div class="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-slate-50"
+                       :class="expandedSpecs[si] ? 'bg-slate-50' : 'bg-white'">
+                    <input type="checkbox"
+                      :checked="isSpecFullySelected(si)"
+                      :indeterminate.prop="isSpecPartiallySelected(si)"
+                      @click.stop="toggleSpecSelection(si)"
+                      class="w-4 h-4 rounded border-slate-300 accent-blue-600 cursor-pointer">
+                    <div class="flex-1 min-w-0" @click="toggleSpec(si)">
+                      <p class="font-medium text-sm text-slate-800" x-text="`Спецификация №${spec.number}`"></p>
+                      <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span class="text-xs text-slate-400" x-text="`Срок: ${spec.deadline}`"></span>
+                        <span class="text-xs px-1.5 py-0.5 rounded font-medium"
+                              :class="spec.signed==='Да' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'"
+                              x-text="spec.signed==='Да' ? '✓ Подписана' : '– Не подписана'"></span>
+                        <span class="text-xs text-slate-400" x-text="`${spec.items.length} поз.`"></span>
+                        <span x-show="countSelectedItems(si)>0"
+                              class="text-xs text-blue-600 font-medium"
+                              x-text="`• выбрано ${countSelectedItems(si)}`"></span>
+                      </div>
+                    </div>
+                    <div @click="toggleSpec(si)" class="p-1 cursor-pointer">
+                      <svg class="w-4 h-4 text-slate-400 transition-transform" :class="expandedSpecs[si] ? 'rotate-180' : ''"
+                           fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                  </div>
+                  <!-- Items -->
+                  <div x-show="expandedSpecs[si]" class="border-t border-slate-100 divide-y divide-slate-50">
+                    <template x-for="(item, ii) in spec.items" :key="ii">
+                      <label class="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors hover:bg-blue-50/30"
+                             :class="selectedItems[si+'-'+ii] ? 'bg-blue-50/20' : ''">
+                        <input type="checkbox"
+                          :checked="selectedItems[si+'-'+ii]"
+                          @change="toggleItem(si,ii)"
+                          class="w-4 h-4 rounded border-slate-300 accent-blue-600 shrink-0 cursor-pointer">
+                        <span class="flex-1 text-sm text-slate-700" x-text="item.name"></span>
+                        <span class="text-xs text-slate-400 whitespace-nowrap" x-text="item.qty+' шт.'"></span>
+                      </label>
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <div x-show="totalSelectedItems()>0" class="mt-4 p-3 bg-blue-50 rounded-lg flex items-center gap-2 text-sm text-blue-700">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span x-text="`Выбрано ${totalSelectedItems()} позиций из ${specs.reduce((s,sp)=>s+sp.items.length,0)}`"></span>
+            </div>
+
+            <div class="mt-6 flex justify-between">
+              <button @click="step=3" class="px-5 py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">← Назад</button>
+              <button @click="step=5" :disabled="totalSelectedItems()===0"
+                class="px-6 py-2.5 bg-navy-800 hover:bg-navy-700 disabled:opacity-40 text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2">
+                Продолжить
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 5: Reasons & Dates ── -->
+        <div x-show="step === 5" class="step-anim">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <p class="text-slate-500 text-sm mb-5">Укажите причину переноса и новые сроки поставки.</p>
+
+            <!-- Mode toggle -->
+            <div class="flex items-center gap-4 p-3.5 bg-slate-50 rounded-xl mb-6 border border-slate-200">
+              <span class="text-xs font-medium text-slate-600">Режим:</span>
+              <div class="flex bg-white border border-slate-200 rounded-lg p-0.5 gap-0.5 text-xs">
+                <button @click="uniformMode=true"
+                  class="px-3 py-1.5 rounded-md font-medium transition-all"
+                  :class="uniformMode ? 'bg-navy-800 text-white' : 'text-slate-500 hover:bg-slate-50'">
+                  Единые для всех
+                </button>
+                <button @click="uniformMode=false"
+                  class="px-3 py-1.5 rounded-md font-medium transition-all"
+                  :class="!uniformMode ? 'bg-navy-800 text-white' : 'text-slate-500 hover:bg-slate-50'">
+                  Индивидуально
+                </button>
+              </div>
+            </div>
+
+            <!-- Uniform -->
+            <div x-show="uniformMode" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Причина переноса <span class="text-red-400">*</span></label>
+                <textarea x-model="uniformReason" rows="3"
+                  placeholder="Укажите причину переноса срока поставки..."
+                  class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent resize-none transition-shadow"></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">Новый срок поставки <span class="text-red-400">*</span></label>
+                <input type="date" x-model="uniformDate"
+                  class="px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent transition-shadow">
+              </div>
+            </div>
+
+            <!-- Individual -->
+            <div x-show="!uniformMode" class="space-y-4">
+              <template x-for="entry in getSelectedEntriesFlat()" :key="entry.key">
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <div class="flex items-start gap-2 mb-3">
+                    <div class="w-5 h-5 bg-blue-100 rounded flex items-center justify-center mt-0.5 shrink-0">
+                      <svg class="w-3 h-3 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    </div>
+                    <div>
+                      <p class="font-medium text-sm text-slate-800" x-text="entry.itemName"></p>
+                      <p class="text-xs text-slate-500" x-text="`Спец. №${entry.specNumber} · ${entry.qty} шт.`"></p>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-medium text-slate-600 mb-1">Причина <span class="text-red-400">*</span></label>
+                      <textarea rows="2"
+                        :value="(itemData[entry.key]||{}).reason||''"
+                        @input="updateItemData(entry.key,'reason',$event.target.value)"
+                        placeholder="Причина переноса..."
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"></textarea>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-slate-600 mb-1">Новый срок <span class="text-red-400">*</span></label>
+                      <input type="date"
+                        :value="(itemData[entry.key]||{}).date||''"
+                        @change="updateItemData(entry.key,'date',$event.target.value)"
+                        class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <div class="mt-6 flex justify-between">
+              <button @click="step=4" class="px-5 py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">← Назад</button>
+              <button @click="step=6" :disabled="!step5Valid()"
+                class="px-6 py-2.5 bg-navy-800 hover:bg-navy-700 disabled:opacity-40 text-white rounded-xl font-medium text-sm transition-colors flex items-center gap-2">
+                Продолжить
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 6: Comment ── -->
+        <div x-show="step === 6" class="step-anim">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <p class="text-slate-500 text-sm mb-1">Добавьте дополнительный комментарий — необязательно.</p>
+            <p class="text-xs text-slate-400 mb-5">Например: «позиция X готова и будет отгружена 15.06» или «просим подтвердить до 01.06».</p>
+
+            <textarea x-model="comment" rows="5"
+              placeholder="Дополнительная информация (можно оставить пустым)..."
+              class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none transition-shadow"></textarea>
+
+            <!-- Summary before generation -->
+            <div class="mt-5 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 space-y-1">
+              <p><span class="font-medium text-slate-600">Менеджер:</span> <span x-text="selectedManager"></span></p>
+              <p><span class="font-medium text-slate-600">Компания:</span> <span x-text="company"></span></p>
+              <p><span class="font-medium text-slate-600">Позиций:</span> <span x-text="totalSelectedItems()"></span></p>
+            </div>
+
+            <div class="mt-6 flex justify-between">
+              <button @click="step=5" class="px-5 py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">← Назад</button>
+              <button @click="startGeneration()"
+                class="px-6 py-2.5 bg-gold-500 hover:bg-gold-600 text-navy-900 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2 shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Сгенерировать письмо
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STEP 7: Generation & Review ── -->
+        <div x-show="step === 7" class="step-anim">
+
+          <!-- Generating -->
+          <div x-show="generating" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-amber-500 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-slate-800 text-sm">Генерирую текст письма...</p>
+                <p class="text-xs text-slate-400 mt-0.5">AI создаёт официальный текст на основе ваших данных</p>
+              </div>
+            </div>
+            <div class="border border-slate-200 rounded-xl p-6 bg-slate-50 min-h-40">
+              <div class="letter-font text-sm text-slate-700 whitespace-pre-wrap leading-relaxed"
+                   :class="letterText ? 'cursor' : 'text-slate-400'"
+                   x-text="letterText || 'Ожидание ответа...'"></div>
+            </div>
+          </div>
+
+          <!-- Error -->
+          <div x-show="!generating && generateError" class="bg-white rounded-2xl shadow-sm border border-red-200 p-8">
+            <div class="flex items-start gap-3 mb-5">
+              <div class="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div>
+                <p class="font-semibold text-red-800 text-sm">Ошибка генерации</p>
+                <p class="text-xs text-red-600 mt-1 whitespace-pre-wrap" x-text="generateError"></p>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <button @click="step=6" class="px-5 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">← Назад</button>
+              <button @click="startGeneration()" class="px-5 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">Повторить</button>
+            </div>
+          </div>
+
+          <!-- Review -->
+          <template x-if="!generating && !generateError && letterText">
+            <div>
+              <!-- Letter card -->
+              <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="font-semibold text-navy-800">Текст письма</h2>
+                  <span class="text-xs text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md">Можно редактировать</span>
+                </div>
+                <textarea x-model="letterText" rows="18"
+                  class="w-full letter-font text-sm text-slate-700 border border-slate-200 rounded-xl px-6 py-5 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent resize-y leading-relaxed transition-shadow"></textarea>
+              </div>
+
+              <!-- Revise form -->
+              <div x-show="showReviseForm" class="bg-white rounded-2xl shadow-sm border border-orange-200 p-6 mb-4">
+                <h3 class="font-medium text-slate-800 text-sm mb-3">Что нужно исправить?</h3>
+                <textarea x-model="reviseFeedback" rows="3"
+                  placeholder="Опишите изменения в тексте письма..."
+                  class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 resize-none"></textarea>
+                <div class="flex gap-2.5 mt-3">
+                  <button @click="showReviseForm=false; reviseFeedback=''"
+                    class="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">Отмена</button>
+                  <button @click="startRevision()" :disabled="!reviseFeedback.trim()"
+                    class="px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white rounded-lg font-medium flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Перегенерировать
+                  </button>
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="flex flex-wrap items-center gap-3">
+                <button @click="step=6" class="px-5 py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">← Назад</button>
+                <div class="flex-1"></div>
+                <button x-show="!showReviseForm" @click="showReviseForm=true"
+                  class="px-5 py-2.5 text-sm text-orange-600 border border-orange-200 bg-orange-50 hover:bg-orange-100 rounded-xl font-medium transition-colors flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  Исправить
+                </button>
+                <button @click="downloadDocx()" :disabled="downloading"
+                  class="px-6 py-2.5 text-sm bg-green-600 hover:bg-green-700 disabled:opacity-40 text-white rounded-xl font-semibold transition-colors flex items-center gap-2 shadow-sm">
+                  <svg x-show="downloading" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  <svg x-show="!downloading" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  <span x-text="downloading ? 'Сохраняю...' : 'Скачать .docx'"></span>
+                </button>
+              </div>
+
+              <!-- Success -->
+              <div x-show="downloadedFile" class="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-green-800">Файл сохранён</p>
+                  <p class="text-xs text-green-600 truncate" x-text="downloadedFile"></p>
+                </div>
+                <button @click="resetApp()"
+                  class="shrink-0 px-4 py-2 bg-navy-800 hover:bg-navy-700 text-white rounded-lg text-xs font-medium transition-colors">
+                  Создать ещё
+                </button>
+              </div>
+            </div>
+          </template>
+
+        </div>
+        <!-- /step 7 -->
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function letterApp() {
+  return {
+    step: 1,
+    steps: ['Загрузка файла','Менеджер','Договор','Спецификации','Причины и сроки','Комментарий','Письмо'],
+
+    // step 1
+    sessionId: null, dragOver: false, fileName: null, selectedFile: null,
+    uploading: false, uploadError: null,
+
+    // step 2
+    managers: [], selectedManager: null,
+
+    // step 3
+    contracts: [], loadingContracts: false, selectedContractIdx: null,
+
+    // step 4
+    specs: [], company: '', contract: '', loadingSpecs: false,
+    selectedItems: {}, expandedSpecs: {},
+
+    // step 5
+    uniformMode: true, uniformReason: '', uniformDate: '', itemData: {},
+
+    // step 6
+    comment: '',
+
+    // step 7
+    generating: false, letterText: '', generateError: null,
+    showReviseForm: false, reviseFeedback: '',
+    downloading: false, downloadedFile: null,
+
+    // ── Step 1 ──
+
+    handleDrop(e) {
+      this.dragOver = false;
+      const f = e.dataTransfer.files[0];
+      if (f && f.name.endsWith('.xlsx')) {
+        this.selectedFile = f; this.fileName = f.name; this.uploadError = null;
+      } else {
+        this.uploadError = 'Пожалуйста, выберите файл .xlsx';
+      }
+    },
+
+    handleFileSelect(e) {
+      const f = e.target.files[0];
+      if (f) { this.selectedFile = f; this.fileName = f.name; this.uploadError = null; }
+    },
+
+    async uploadFile() {
+      if (!this.selectedFile) return;
+      this.uploading = true; this.uploadError = null;
+      const fd = new FormData();
+      fd.append('file', this.selectedFile);
+      try {
+        const r = await fetch('/api/upload', { method: 'POST', body: fd });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || 'Ошибка загрузки');
+        this.sessionId = d.session_id;
+        this.managers = d.managers;
+        this.step = 2;
+      } catch(e) { this.uploadError = e.message; }
+      finally { this.uploading = false; }
+    },
+
+    // ── Step 2 ──
+
+    async loadContracts() {
+      if (!this.selectedManager) return;
+      this.loadingContracts = true;
+      try {
+        const p = new URLSearchParams({ session_id: this.sessionId, manager: this.selectedManager });
+        const r = await fetch(`/api/contracts?${p}`);
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail);
+        this.contracts = d.contracts;
+        this.selectedContractIdx = null;
+        this.step = 3;
+      } catch(e) { alert('Ошибка: ' + e.message); }
+      finally { this.loadingContracts = false; }
+    },
+
+    // ── Step 3 ──
+
+    async loadSpecs() {
+      if (this.selectedContractIdx === null) return;
+      this.loadingSpecs = true;
+      try {
+        const p = new URLSearchParams({
+          session_id: this.sessionId,
+          manager: this.selectedManager,
+          contract_idx: this.selectedContractIdx
+        });
+        const r = await fetch(`/api/specs?${p}`);
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail);
+        this.specs = d.specs;
+        this.company = d.company;
+        this.contract = d.contract;
+        this.selectedItems = {};
+        this.expandedSpecs = {};
+        if (this.specs.length) this.expandedSpecs = { 0: true };
+        this.step = 4;
+      } catch(e) { alert('Ошибка: ' + e.message); }
+      finally { this.loadingSpecs = false; }
+    },
+
+    // ── Step 4 ──
+
+    toggleSpec(si) {
+      this.expandedSpecs = { ...this.expandedSpecs, [si]: !this.expandedSpecs[si] };
+    },
+    isSpecExpanded(si) { return !!this.expandedSpecs[si]; },
+
+    isSpecFullySelected(si) {
+      return this.specs[si].items.every((_,ii) => this.selectedItems[`${si}-${ii}`]);
+    },
+    isSpecPartiallySelected(si) {
+      const n = this.specs[si].items.filter((_,ii) => this.selectedItems[`${si}-${ii}`]).length;
+      return n > 0 && n < this.specs[si].items.length;
+    },
+    toggleSpecSelection(si) {
+      const all = this.isSpecFullySelected(si);
+      const upd = { ...this.selectedItems };
+      this.specs[si].items.forEach((_,ii) => { upd[`${si}-${ii}`] = !all; });
+      this.selectedItems = upd;
+    },
+    toggleItem(si, ii) {
+      const k = `${si}-${ii}`;
+      this.selectedItems = { ...this.selectedItems, [k]: !this.selectedItems[k] };
+    },
+    countSelectedItems(si) {
+      return this.specs[si].items.filter((_,ii) => this.selectedItems[`${si}-${ii}`]).length;
+    },
+    totalSelectedItems() { return Object.values(this.selectedItems).filter(Boolean).length; },
+    selectAllItems() {
+      const upd = {}; const exp = {};
+      this.specs.forEach((sp,si) => {
+        exp[si] = true;
+        sp.items.forEach((_,ii) => { upd[`${si}-${ii}`] = true; });
+      });
+      this.selectedItems = upd; this.expandedSpecs = exp;
+    },
+
+    // ── Step 5 ──
+
+    getSelectedEntriesFlat() {
+      const r = [];
+      this.specs.forEach((sp,si) => {
+        sp.items.forEach((it,ii) => {
+          if (this.selectedItems[`${si}-${ii}`])
+            r.push({ key:`${si}-${ii}`, specIdx:si, itemIdx:ii, specNumber:sp.number, itemName:it.name, qty:it.qty });
+        });
+      });
+      return r;
+    },
+
+    updateItemData(key, field, val) {
+      const cur = this.itemData[key] || { reason:'', date:'' };
+      this.itemData = { ...this.itemData, [key]: { ...cur, [field]: val } };
+    },
+
+    isoToRu(d) {
+      if (!d) return '';
+      const [y,m,day] = d.split('-');
+      return `${day}.${m}.${y}`;
+    },
+
+    step5Valid() {
+      if (!this.totalSelectedItems()) return false;
+      if (this.uniformMode) return this.uniformReason.trim() !== '' && this.uniformDate !== '';
+      return this.getSelectedEntriesFlat().every(e => {
+        const d = this.itemData[e.key] || {};
+        return d.reason && d.reason.trim() && d.date;
+      });
+    },
+
+    // ── Build API payload ──
+
+    buildEntries() {
+      const res = [];
+      this.specs.forEach((sp,si) => {
+        const sel = sp.items
+          .map((it,ii) => ({it,ii}))
+          .filter(({ii}) => this.selectedItems[`${si}-${ii}`]);
+        if (!sel.length) return;
+        res.push({
+          company: this.company,
+          contract: this.contract,
+          number: sp.number,
+          date: sp.date,
+          deadline: sp.deadline,
+          items: sel.map(({it,ii}) => {
+            const reason = this.uniformMode ? this.uniformReason : ((this.itemData[`${si}-${ii}`]||{}).reason||'');
+            const newDate = this.isoToRu(this.uniformMode ? this.uniformDate : ((this.itemData[`${si}-${ii}`]||{}).date||''));
+            return { name: it.name, qty: it.qty, reason, new_date: newDate };
+          })
+        });
+      });
+      return res;
+    },
+
+    getSpecsStr() {
+      return this.buildEntries().map(e => e.number).join(', ').slice(0, 80);
+    },
+
+    // ── Step 7: Generation ──
+
+    async startGeneration() {
+      this.step = 7;
+      this.generating = true;
+      this.letterText = '';
+      this.generateError = null;
+      this.showReviseForm = false;
+      this.downloadedFile = null;
+      await this._stream('', '');
+    },
+
+    async startRevision() {
+      const fb = this.reviseFeedback;
+      const prev = this.letterText;
+      this.showReviseForm = false;
+      this.reviseFeedback = '';
+      this.generating = true;
+      this.generateError = null;
+      this.letterText = '';
+      await this._stream(fb, prev);
+    },
+
+    async _stream(feedback, previousText) {
+      try {
+        const resp = await fetch('/api/generate-stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entries: this.buildEntries(),
+            manager: this.selectedManager,
+            comment: this.comment,
+            feedback,
+            previous_text: previousText
+          })
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          throw new Error(err.detail || 'Ошибка сервера');
+        }
+        const reader = resp.body.getReader();
+        const dec = new TextDecoder();
+        let buf = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop() || '';
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const raw = line.slice(6).trim();
+            if (raw === '[DONE]') { this.generating = false; return; }
+            try {
+              const chunk = JSON.parse(raw);
+              if (typeof chunk === 'string') this.letterText += chunk;
+              else if (chunk && chunk.__error__) throw new Error(chunk.__error__);
+            } catch(pe) {
+              if (pe.message.includes('__error__')) throw pe;
+            }
+          }
+        }
+      } catch(e) {
+        this.generateError = e.message;
+      } finally {
+        this.generating = false;
+      }
+    },
+
+    // ── Download ──
+
+    async downloadDocx() {
+      this.downloading = true;
+      try {
+        const resp = await fetch('/api/download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            body_text: this.letterText,
+            company: this.company,
+            manager: this.selectedManager,
+            specs_str: this.getSpecsStr()
+          })
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          throw new Error(err.detail || 'Ошибка сохранения');
+        }
+        const blob = await resp.blob();
+        const today = new Date().toISOString().split('T')[0];
+        const filename = `letter_${this.company}_${this.getSpecsStr()}_${today}.docx`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+        this.downloadedFile = filename;
+      } catch(e) { alert('Ошибка: ' + e.message); }
+      finally { this.downloading = false; }
+    },
+
+    // ── Reset ──
+
+    resetApp() {
+      Object.assign(this, letterApp());
+    }
+  };
+}
+</script>
+</body>
+</html>

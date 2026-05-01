@@ -1,0 +1,41 @@
+{
+  "defaultMode": "bypassPermissions",
+  "permissions": {
+    "allow": [
+      "Bash(python -m alembic upgrade head)",
+
+      "Bash(pip install fastapi)",
+      "Bash(pip install sqlalchemy)",
+      "Bash(pip install alembic)",
+      "Bash(pip install psycopg2-binary)",
+
+      "WebFetch(domain:stitch.withgoogle.com)",
+      "WebFetch(domain:context7.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.anthropic.com)",
+
+      "Bash(git init)",
+      "Bash(git remote -v)",
+      "Bash(git add .)",
+      "Bash(git commit -m *)",
+
+      "Bash(python main.py)",
+      "Bash(python -c \"*\")",
+
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:8001/)",
+      "Bash(curl -s http://localhost:8001/quick-calc -o /dev/null -w '%{http_code}')",
+
+      "Bash(find C:/Projeck/kp-new -type f -name \"*quick*\")",
+
+      "Bash(iconv -f utf-8 -t utf-8)",
+
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_snapshot"
+    ]
+  }
+}

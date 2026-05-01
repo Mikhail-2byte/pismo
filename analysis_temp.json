@@ -1,0 +1,418 @@
+{
+  "title": "Анализ структуры Excel файла",
+  "file": "C:\\Projeck\\pisma\\Otchet_po_spetsifikatsiam_v_rabote_2026-04-26.xlsx",
+  "sheets": [
+    "Лист_1"
+  ],
+  "active_sheet": "Лист_1",
+  "total_rows": 1502,
+  "total_columns": 12,
+  "header_info": {
+    "row_1_title": "Отчет по спецификациям [ТД для менеджеров]",
+    "row_2_description": "Период: 01.01.2023 - 26.04.2026\nОрганизация Равно \"ТД РИНАКО\" И Заказ покупателя.Комментарий Не содержит \"отгружен\"\nОтбор: Параметры: ВалютаСумм=Валюта взаиморасчетов; ВалютаРуб=RUB;"
+  },
+  "column_headers": [
+    {
+      "column": 1,
+      "header_level_1": "Заказ покупателя.Договор контрагента",
+      "header_level_2": "Заказ покупателя.Номер спецификации"
+    },
+    {
+      "column": 2,
+      "header_level_1": null,
+      "header_level_2": "Заказ покупателя.Дата"
+    },
+    {
+      "column": 3,
+      "header_level_1": null,
+      "header_level_2": "Заказ покупателя.Дата отгрузки"
+    },
+    {
+      "column": 4,
+      "header_level_1": null,
+      "header_level_2": "Заказ покупателя.Подписан"
+    },
+    {
+      "column": 5,
+      "header_level_1": "По спецификации",
+      "header_level_2": "Количество"
+    },
+    {
+      "column": 6,
+      "header_level_1": "Размещение",
+      "header_level_2": "Заказ поставщику количество"
+    },
+    {
+      "column": 7,
+      "header_level_1": "Отгружено",
+      "header_level_2": "Количество"
+    },
+    {
+      "column": 8,
+      "header_level_1": "примечание",
+      "header_level_2": "Долг по отгрузке количество"
+    },
+    {
+      "column": 9,
+      "header_level_1": null,
+      "header_level_2": "Долг по отгрузке Вес, кг"
+    },
+    {
+      "column": 10,
+      "header_level_1": null,
+      "header_level_2": null
+    },
+    {
+      "column": 11,
+      "header_level_1": null,
+      "header_level_2": null
+    },
+    {
+      "column": 12,
+      "header_level_1": null,
+      "header_level_2": null
+    }
+  ],
+  "data_structure_samples": [
+    {
+      "row": 6,
+      "columns": {
+        "col_1": "Баяндин О. Н.",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "211",
+        "col_6": "206",
+        "col_7": "2",
+        "col_8": "209",
+        "col_9": 115162,
+        "col_10": null,
+        "col_11": null,
+        "col_12": null
+      }
+    },
+    {
+      "row": 7,
+      "columns": {
+        "col_1": "ВКМ-СТАЛЬ",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "1",
+        "col_6": "1",
+        "col_7": null,
+        "col_8": "1",
+        "col_9": 1234,
+        "col_10": null,
+        "col_11": null,
+        "col_12": null
+      }
+    },
+    {
+      "row": 8,
+      "columns": {
+        "col_1": "Договор №1210/54/26 от 06.04.2026",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "1",
+        "col_6": "1",
+        "col_7": null,
+        "col_8": "1",
+        "col_9": 1234,
+        "col_10": null,
+        "col_11": null,
+        "col_12": null
+      }
+    },
+    {
+      "row": 9,
+      "columns": {
+        "col_1": "1 от 06.04.2026",
+        "col_2": "26.04.2026",
+        "col_3": "04.10.2026",
+        "col_4": "Да",
+        "col_5": "1",
+        "col_6": "1",
+        "col_7": null,
+        "col_8": "1",
+        "col_9": 1234,
+        "col_10": null,
+        "col_11": null,
+        "col_12": "гидроцилиндр"
+      }
+    },
+    {
+      "row": 10,
+      "columns": {
+        "col_1": "Гидроцилиндр наклона ванны С12-18-57-10 для печи ДПС-16 ч.031.1294 ГЧ",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "1",
+        "col_6": "1",
+        "col_7": null,
+        "col_8": "1",
+        "col_9": 1234,
+        "col_10": "Yancheng Gaobo International Trading Co., Ltd (прочие)",
+        "col_11": "YGIT-TC-05-2024 прил. 67 от 28/04/2026",
+        "col_12": null
+      }
+    },
+    {
+      "row": 11,
+      "columns": {
+        "col_1": "ЛАССЕЛСБЕРГЕР",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "54",
+        "col_6": "54",
+        "col_7": null,
+        "col_8": "54",
+        "col_9": 5691,
+        "col_10": null,
+        "col_11": null,
+        "col_12": null
+      }
+    },
+    {
+      "row": 12,
+      "columns": {
+        "col_1": "Договор №200/25 от 01.10.2025",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "54",
+        "col_6": "54",
+        "col_7": null,
+        "col_8": "54",
+        "col_9": 5691,
+        "col_10": null,
+        "col_11": null,
+        "col_12": null
+      }
+    },
+    {
+      "row": 13,
+      "columns": {
+        "col_1": "1 (200/25) от 01.10.2025",
+        "col_2": "21.10.2025",
+        "col_3": "19.04.2026",
+        "col_4": "Да",
+        "col_5": "54",
+        "col_6": "54",
+        "col_7": null,
+        "col_8": "54",
+        "col_9": 5691,
+        "col_10": null,
+        "col_11": null,
+        "col_12": "колеса, вал, гребенка, гильза"
+      }
+    },
+    {
+      "row": 14,
+      "columns": {
+        "col_1": "Вал дробилки ч.ЛБ.1.000.6",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "2",
+        "col_6": "2",
+        "col_7": null,
+        "col_8": "2",
+        "col_9": 1015,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 74 от 22/10/2025",
+        "col_12": null
+      }
+    },
+    {
+      "row": 15,
+      "columns": {
+        "col_1": "Гильза ч.ЛБ.1.000.12",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "2",
+        "col_6": "2",
+        "col_7": null,
+        "col_8": "2",
+        "col_9": 37,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 74 от 22/10/2025",
+        "col_12": null
+      }
+    },
+    {
+      "row": 16,
+      "columns": {
+        "col_1": "Гребенка ч.ЛБ.1.000.9",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "2",
+        "col_6": "2",
+        "col_7": null,
+        "col_8": "2",
+        "col_9": 586,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 74 от 22/10/2025",
+        "col_12": null
+      }
+    },
+    {
+      "row": 17,
+      "columns": {
+        "col_1": "Колесо зубчатое большое ч.ЛБ.1.000.7",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "24",
+        "col_6": "24",
+        "col_7": null,
+        "col_8": "24",
+        "col_9": 2784,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 74 от 22/10/2025",
+        "col_12": null
+      }
+    },
+    {
+      "row": 18,
+      "columns": {
+        "col_1": "Колесо зубчатое малое ч.ЛБ.1.000.8",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "24",
+        "col_6": "24",
+        "col_7": null,
+        "col_8": "24",
+        "col_9": 1269,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 74 от 22/10/2025",
+        "col_12": null
+      }
+    },
+    {
+      "row": 19,
+      "columns": {
+        "col_1": "Лебединский ГОК (ЛГОК)",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "58",
+        "col_6": "56",
+        "col_7": "2",
+        "col_8": "56",
+        "col_9": 29581,
+        "col_10": null,
+        "col_11": null,
+        "col_12": null
+      }
+    },
+    {
+      "row": 20,
+      "columns": {
+        "col_1": "Договор №ЛГ-222330 от 18/11/2022",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "58",
+        "col_6": "56",
+        "col_7": "2",
+        "col_8": "56",
+        "col_9": 29581,
+        "col_10": null,
+        "col_11": null,
+        "col_12": null
+      }
+    },
+    {
+      "row": 21,
+      "columns": {
+        "col_1": "4500389041 от 25/08/2025",
+        "col_2": "10.09.2025",
+        "col_3": "11.12.2025",
+        "col_4": "Да",
+        "col_5": "4",
+        "col_6": "4",
+        "col_7": "2",
+        "col_8": "2",
+        "col_9": 429,
+        "col_10": null,
+        "col_11": null,
+        "col_12": "вклдыш, заключили, направили ДС о продлении срока по ЭДО. Дельта НДС 2% - 729,31"
+      }
+    },
+    {
+      "row": 22,
+      "columns": {
+        "col_1": "Вкладыш опорно-упорный Ø300 ч.2307.114 СБ",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "2",
+        "col_6": "2",
+        "col_7": "1",
+        "col_8": "1",
+        "col_9": 228,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 75 от 24/10/2025 Лоян",
+        "col_12": null
+      }
+    },
+    {
+      "row": 23,
+      "columns": {
+        "col_1": "Вкладыш опорный Ø300 ч.2307.113 СБ",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "2",
+        "col_6": "2",
+        "col_7": "1",
+        "col_8": "1",
+        "col_9": 201,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 75 от 24/10/2025 Лоян",
+        "col_12": null
+      }
+    },
+    {
+      "row": 24,
+      "columns": {
+        "col_1": "4500399436 от 06.11.2025",
+        "col_2": "14.11.2025",
+        "col_3": "15.04.2026",
+        "col_4": "Да",
+        "col_5": "1",
+        "col_6": "1",
+        "col_7": null,
+        "col_8": "1",
+        "col_9": 523,
+        "col_10": null,
+        "col_11": null,
+        "col_12": "полумуфта"
+      }
+    },
+    {
+      "row": 25,
+      "columns": {
+        "col_1": "Полумуфта ч.AZNZ22-00.00 СБ",
+        "col_2": null,
+        "col_3": null,
+        "col_4": null,
+        "col_5": "1",
+        "col_6": "1",
+        "col_7": null,
+        "col_8": "1",
+        "col_9": 523,
+        "col_10": "Tianjin Taiheland Petroleum Machinery Co., Ltd",
+        "col_11": "TTPM-TC-20240116  прил. 91 от 25/11/2025 Лоян",
+        "col_12": null
+      }
+    }
+  ]
+}
