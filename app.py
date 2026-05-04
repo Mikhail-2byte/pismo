@@ -96,9 +96,9 @@ async def get_specs_api(session_id: str, manager: str, contract_idx: int):
     return {"company": c["company"], "contract": c["contract"], "specs": c["specs"]}
 
 
-def _sse_generator(entries, manager, comment, feedback, previous_text) -> Iterator[str]:
+def _sse_generator(entries, manager, comment, feedback, previous_text, attachments) -> Iterator[str]:
     try:
-        for chunk in generate_letter_stream(entries, manager, comment, feedback, previous_text):
+        for chunk in generate_letter_stream(entries, manager, comment, feedback, previous_text, attachments):
             if chunk:
                 yield f"data: {json.dumps(chunk)}\n\n"
     except Exception as e:
@@ -116,6 +116,7 @@ async def generate_stream(request: Request):
             body.get("comment", ""),
             body.get("feedback", ""),
             body.get("previous_text", ""),
+            body.get("attachments", []),
         ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
@@ -129,6 +130,7 @@ async def download_docx(request: Request):
     company = body["company"]
     manager = body["manager"]
     specs_str = body.get("specs_str", "")
+    attachments = body.get("attachments", [])
 
     today = datetime.now()
 
@@ -143,6 +145,7 @@ async def download_docx(request: Request):
         "company": company,
         "contact_info": f"Менеджер: {manager}\nТел.: ___________",
         "body": body_text,
+        "attachments": attachments,
     }, output_path)
 
     encoded = quote(filename.encode('utf-8'), safe='')
@@ -160,8 +163,11 @@ async def download_docx(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
+    import socket
+    local_ip = socket.gethostbyname(socket.gethostname())
     print("\n" + "=" * 52)
     print("  Генератор деловых писем")
-    print("  Откройте браузер: http://127.0.0.1:8000")
+    print(f"  Локально:  http://127.0.0.1:8000")
+    print(f"  В сети:    http://{local_ip}:8000")
     print("=" * 52 + "\n")
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=False)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)

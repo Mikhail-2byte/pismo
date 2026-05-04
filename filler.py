@@ -129,6 +129,16 @@ def _replace_body(doc: Document, body_text: str):
     target_para._p.addprevious(spacer)
 
 
+def _append_attachments(body: str, attachments: list) -> str:
+    """Добавляет раздел «Приложение:» к телу письма."""
+    if not attachments:
+        return body
+    lines = ['Приложение:']
+    for i, name in enumerate(attachments, 1):
+        lines.append(f'{i}. {name}')
+    return body + '\n\n' + '\n'.join(lines)
+
+
 def fill_template(template_path: str, data: dict, output_path: str):
     """Заполняет шаблон данными и сохраняет результат."""
     doc = Document(template_path)
@@ -137,7 +147,8 @@ def fill_template(template_path: str, data: dict, output_path: str):
     _replace_in_doc(doc, '{{ company }}', data.get('company', ''))
     _replace_in_doc(doc, '{{ contact_info }}', data.get('contact_info', ''))
 
-    _replace_body(doc, data.get('body', ''))
+    body = _append_attachments(data.get('body', ''), data.get('attachments', []))
+    _replace_body(doc, body)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     doc.save(output_path)

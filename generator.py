@@ -1,18 +1,27 @@
 """
-Генерация текста официального письма через Groq (бесплатный tier).
+Генерация текста официального письма через Groq.
 
-generate_letter(entries, manager, feedback, previous_text) → str
+generate_letter(entries, manager, comment, feedback, previous_text, attachments) → str
+generate_letter_stream(...)  — streaming-версия, yields text chunks
 """
 
 import os
+import httpx
 from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
 
 load_dotenv(Path(__file__).parent / '.env')
 
-_MODEL       = os.environ.get('GROQ_MODEL', 'qwen/qwen3-32b')
+_MODEL       = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile')
 _TEMPERATURE = float(os.environ.get('GROQ_TEMPERATURE', '0.7'))
+
+
+def _make_client(api_key: str) -> Groq:
+    proxy = os.environ.get('HTTPS_PROXY') or os.environ.get('HTTP_PROXY')
+    if proxy:
+        return Groq(api_key=api_key, http_client=httpx.Client(proxy=proxy))
+    return Groq(api_key=api_key)
 
 
 def _build_spec_block(entry: dict, idx: int, total: int) -> str:
@@ -50,29 +59,15 @@ def _build_spec_block(entry: dict, idx: int, total: int) -> str:
         return '\n'.join(lines)
 
 
-def generate_letter(
+def _build_prompt(
     entries: list[dict],
     manager: str,
-    comment: str = '',
-    feedback: str = '',
-    previous_text: str = '',
+    comment: str,
+    feedback: str,
+    previous_text: str,
+    attachments: list[str],
 ) -> str:
-    """
-    entries:       список спецификаций, каждая содержит позиции с reason и new_date
-    manager:       имя менеджера
-    comment:       свободный комментарий пользователя (доп. информация или просьба)
-    feedback:      замечание пользователя к предыдущей версии
-    previous_text: предыдущий вариант письма (для контекста)
-    """
-    api_key = os.environ.get('GROQ_API_KEY', '').strip()
-    if not api_key:
-        raise EnvironmentError(
-            'GROQ_API_KEY не найден в .env файле.\n'
-            'Получить бесплатный ключ: https://console.groq.com'
-        )
-
-    client = Groq(api_key=api_key)
-
+    """Формирует промпт для генерации или перегенерации письма."""
     company      = entries[0]['company']
     contract_str = entries[0]['contract']
     spec_blocks  = '\n\n'.join(
@@ -80,24 +75,37 @@ def generate_letter(
     )
     spec_intro = 'одну спецификацию' if len(entries) == 1 else f'{len(entries)} спецификации'
 
-    prompt = f"""Ты — сотрудник отдела продаж промышленной компании. Напиши официальное деловое письмо на русском языке с просьбой о переносе срока поставки.
+    prompt = f"""Ты — официальный представитель компании-поставщика. Напиши тело официального делового письма на русском языке от лица компании с уведомлением о переносе срока поставки и просьбой согласовать новые сроки.
 
 Исходные данные:
-- Компания-заказчик: {company}
+- Компания-получатель: {company}
 - Договор: {contract_str}
 - Письмо охватывает {spec_intro}:
 
 {spec_blocks}
-- Ответственный менеджер: {manager}
+- Подписывает письмо: {manager}
 
-Требования:
-1. Официальный деловой стиль, вежливый тон
-2. Для каждой спецификации — ссылка на номер и дату, перечень позиций с количеством, обоснование причины и просьба перенести срок на указанную дату
-3. Если у позиций разные причины или даты — упомяни каждую отдельно
-4. Выражение готовности к диалогу и принесение извинений за неудобства
-5. Только тело письма — без «Кому:», «От кого:», «Дата:», приветствия «Уважаемые» и подписи (они вставляются отдельно из шаблона)
-6. Объём: 3–6 абзацев
-7. Не используй markdown-разметку (никаких **, ## и т.п.)"""
+Структура письма (строго соблюдай порядок абзацев):
+1. Вступление: кратко обозначь тему письма со ссылкой на договор и спецификацию(и).
+2. Суть: изложи факт вынужденного переноса и причину по каждой спецификации / позиции; если причин несколько — опиши каждую отдельно.
+3. Новые сроки: для каждой спецификации и/или позиции чётко укажи запрашиваемые даты.
+4. Готовность к диалогу: вырази готовность обсудить ситуацию, принеси извинения за неудобства, при необходимости предложи компенсационные меры.
+5. Заключение: выражение уважения к партнёрским отношениям и просьба о подтверждении согласования новых сроков.
+
+Требования к стилю и форматированию:
+- Официальный деловой стиль, вежливый и уважительный тон; письмо пишется от лица компании, а не от отдельного сотрудника
+- Конкретные данные: номера и даты спецификаций, наименования позиций, количество, сроки
+- Только тело письма — без обращения «Уважаемые…», без «Кому:», без подписи (они добавляются шаблоном отдельно)
+- 3–6 абзацев, без маркированных списков внутри абзацев — всё в форме связного текста
+- Не используй markdown-разметку (никаких **, ## и т.п.)"""
+
+    if attachments:
+        att_list = ', '.join(f'«{a}»' for a in attachments)
+        prompt += (
+            f'\n\nК письму прилагаются следующие документы: {att_list}. '
+            f'Упомяни их в тексте письма в уместном месте '
+            f'(например, «к настоящему письму прилагается…»).'
+        )
 
     if comment:
         prompt += f'\n\nДополнительно необходимо включить в письмо: {comment}'
@@ -108,6 +116,27 @@ def generate_letter(
             f'\n\nЗамечание пользователя: {feedback}'
             f'\n\nПерепиши письмо с учётом этого замечания, сохранив все исходные данные.'
         )
+
+    return prompt
+
+
+def generate_letter(
+    entries: list[dict],
+    manager: str,
+    comment: str = '',
+    feedback: str = '',
+    previous_text: str = '',
+    attachments: list[str] | None = None,
+) -> str:
+    api_key = os.environ.get('GROQ_API_KEY', '').strip()
+    if not api_key:
+        raise EnvironmentError(
+            'GROQ_API_KEY не найден в .env файле.\n'
+            'Получить бесплатный ключ: https://console.groq.com'
+        )
+
+    client = _make_client(api_key)
+    prompt = _build_prompt(entries, manager, comment, feedback, previous_text, attachments or [])
 
     response = client.chat.completions.create(
         model=_MODEL,
@@ -124,6 +153,7 @@ def generate_letter_stream(
     comment: str = '',
     feedback: str = '',
     previous_text: str = '',
+    attachments: list[str] | None = None,
 ):
     """Streaming version of generate_letter — yields text chunks."""
     api_key = os.environ.get('GROQ_API_KEY', '').strip()
@@ -133,43 +163,8 @@ def generate_letter_stream(
             'Получить бесплатный ключ: https://console.groq.com'
         )
 
-    client = Groq(api_key=api_key)
-
-    company      = entries[0]['company']
-    contract_str = entries[0]['contract']
-    spec_blocks  = '\n\n'.join(
-        _build_spec_block(e, i, len(entries)) for i, e in enumerate(entries)
-    )
-    spec_intro = 'одну спецификацию' if len(entries) == 1 else f'{len(entries)} спецификации'
-
-    prompt = f"""Ты — сотрудник отдела продаж промышленной компании. Напиши официальное деловое письмо на русском языке с просьбой о переносе срока поставки.
-
-Исходные данные:
-- Компания-заказчик: {company}
-- Договор: {contract_str}
-- Письмо охватывает {spec_intro}:
-
-{spec_blocks}
-- Ответственный менеджер: {manager}
-
-Требования:
-1. Официальный деловой стиль, вежливый тон
-2. Для каждой спецификации — ссылка на номер и дату, перечень позиций с количеством, обоснование причины и просьба перенести срок на указанную дату
-3. Если у позиций разные причины или даты — упомяни каждую отдельно
-4. Выражение готовности к диалогу и принесение извинений за неудобства
-5. Только тело письма — без «Кому:», «От кого:», «Дата:», приветствия «Уважаемые» и подписи (они вставляются отдельно из шаблона)
-6. Объём: 3–6 абзацев
-7. Не используй markdown-разметку (никаких **, ## и т.п.)"""
-
-    if comment:
-        prompt += f'\n\nДополнительно необходимо включить в письмо: {comment}'
-
-    if feedback and previous_text:
-        prompt += (
-            f'\n\nПредыдущая версия письма:\n{previous_text}'
-            f'\n\nЗамечание пользователя: {feedback}'
-            f'\n\nПерепиши письмо с учётом этого замечания, сохранив все исходные данные.'
-        )
+    client = _make_client(api_key)
+    prompt = _build_prompt(entries, manager, comment, feedback, previous_text, attachments or [])
 
     stream = client.chat.completions.create(
         model=_MODEL,

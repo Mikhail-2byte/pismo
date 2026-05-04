@@ -398,9 +398,20 @@
             <p class="text-slate-500 text-sm mb-1">Добавьте дополнительный комментарий — необязательно.</p>
             <p class="text-xs text-slate-400 mb-5">Например: «позиция X готова и будет отгружена 15.06» или «просим подтвердить до 01.06».</p>
 
-            <textarea x-model="comment" rows="5"
+            <textarea x-model="comment" rows="4"
               placeholder="Дополнительная информация (можно оставить пустым)..."
               class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none transition-shadow"></textarea>
+
+            <!-- Attachments -->
+            <div class="mt-5">
+              <label class="block text-sm font-medium text-slate-700 mb-1">Приложения к письму <span class="text-slate-400 font-normal">(необязательно)</span></label>
+              <p class="text-xs text-slate-400 mb-2">Укажите каждый документ с новой строки. Они будут перечислены внизу письма как «Приложение: 1. … 2. …»</p>
+              <textarea x-model="attachments" rows="3"
+                placeholder="Например:&#10;Фотоотчёт о текущем состоянии производства (6 листов)&#10;Письмо поставщика о задержке компонентов"
+                class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none transition-shadow"></textarea>
+              <div x-show="attachments.trim()" class="mt-2 text-xs text-blue-600 font-medium"
+                   x-text="`Приложений: ${attachments.split('\\n').map(s=>s.trim()).filter(Boolean).length}`"></div>
+            </div>
 
             <!-- Summary before generation -->
             <div class="mt-5 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 space-y-1">
@@ -557,7 +568,7 @@ function letterApp() {
     uniformMode: true, uniformReason: '', uniformDate: '', itemData: {},
 
     // step 6
-    comment: '',
+    comment: '', attachments: '',
 
     // step 7
     generating: false, letterText: '', generateError: null,
@@ -770,6 +781,7 @@ function letterApp() {
             entries: this.buildEntries(),
             manager: this.selectedManager,
             comment: this.comment,
+            attachments: this.attachments.split('\n').map(s => s.trim()).filter(Boolean),
             feedback,
             previous_text: previousText
           })
@@ -796,7 +808,7 @@ function letterApp() {
               if (typeof chunk === 'string') this.letterText += chunk;
               else if (chunk && chunk.__error__) throw new Error(chunk.__error__);
             } catch(pe) {
-              if (pe.message.includes('__error__')) throw pe;
+              if (!(pe instanceof SyntaxError)) throw pe;
             }
           }
         }
@@ -819,7 +831,8 @@ function letterApp() {
             body_text: this.letterText,
             company: this.company,
             manager: this.selectedManager,
-            specs_str: this.getSpecsStr()
+            specs_str: this.getSpecsStr(),
+            attachments: this.attachments.split('\n').map(s => s.trim()).filter(Boolean)
           })
         });
         if (!resp.ok) {
